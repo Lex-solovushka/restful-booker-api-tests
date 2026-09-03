@@ -1,14 +1,23 @@
 {
   "info": {
     "_postman_id": "59c6cb0c-1249-4a2e-a5ba-78e79d50cd9a",
-    "name": "Restful Booker — Test Assignment",
-    "description": "Контрактные позитивные и негативные проверки RESTful Booker. Запускайте коллекцию последовательно. Проверки, связанные с зафиксированными дефектами, намеренно падают относительно ожидаемого контракта; связь указана в Test-cases.xlsx и Bug-reports.xlsx.",
+    "name": "Restful Booker API Tests",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "https://restful-booker.herokuapp.com",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "password123",
       "type": "string"
     },
     {
@@ -2491,8 +2500,8 @@
                   "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
                   "const ids = [...new Set(JSON.parse(pm.collectionVariables.get(\"createdBookingIds\") || \"[]\"))];",
                   "pm.test(\"Cleanup uses only explicitly tracked IDs\", function () { pm.expect(ids).to.be.an(\"array\"); });",
-                  "const basic = require(\"btoa\")(`${pm.environment.get(\"username\")}:${pm.environment.get(\"password\")}`);",
-                  "ids.forEach(id => pm.sendRequest({url: `${pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\")}/booking/${id}`, method: \"DELETE\", header: {\"Authorization\": `Basic ${basic}`}}, function (err, res) { pm.test(`[CLEANUP] Delete tracked ID ${id}`, function () { pm.expect(err).to.eql(null); pm.expect([201, 404, 405]).to.include(res.code); }); }));"
+                  "const basic = require(\"btoa\")(`${pm.collectionVariables.get(\"username\")}:${pm.collectionVariables.get(\"password\")}`);",
+                  "ids.forEach(id => pm.sendRequest({url: `${pm.collectionVariables.get(\"baseUrl\")}/booking/${id}`, method: \"DELETE\", header: {\"Authorization\": `Basic ${basic}`}}, function (err, res) { pm.test(`[CLEANUP] Delete tracked ID ${id}`, function () { pm.expect(err).to.eql(null); pm.expect([201, 404, 405]).to.include(res.code); }); }));"
                 ]
               }
             }
