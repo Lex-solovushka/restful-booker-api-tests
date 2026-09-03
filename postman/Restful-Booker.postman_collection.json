@@ -1,0 +1,2511 @@
+{
+  "info": {
+    "_postman_id": "59c6cb0c-1249-4a2e-a5ba-78e79d50cd9a",
+    "name": "Restful Booker — Test Assignment",
+    "description": "Контрактные позитивные и негативные проверки RESTful Booker. Запускайте коллекцию последовательно. Проверки, связанные с зафиксированными дефектами, намеренно падают относительно ожидаемого контракта; связь указана в Test-cases.xlsx и Bug-reports.xlsx.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://restful-booker.herokuapp.com",
+      "type": "string"
+    },
+    {
+      "key": "runId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "runFirstName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "runFirstNameLower",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "runLastName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "updatedFirstName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patchedFirstName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdBookingIds",
+      "value": "[]",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "filterBookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "putBookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "putValidationBookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patchBookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patchValidationBookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deleteCookieId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deleteBasicId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deleteAuthId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.request.method === \"POST\" && /\\/booking(?:\\?|$)/.test(pm.request.url.toString()) && pm.response.code === 200) {",
+          "  try {",
+          "    const json = pm.response.json();",
+          "    if (json && Number.isInteger(json.bookingid)) {",
+          "      const ids = JSON.parse(pm.collectionVariables.get(\"createdBookingIds\") || \"[]\");",
+          "      const id = String(json.bookingid);",
+          "      if (!ids.includes(id)) ids.push(id);",
+          "      pm.collectionVariables.set(\"createdBookingIds\", JSON.stringify(ids));",
+          "    }",
+          "  } catch (_) {}",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Initialization and Health",
+      "item": [
+        {
+          "name": "[SETUP] Initialize run variables",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = `${Date.now()}${Math.floor(Math.random() * 10000)}`;",
+                  "pm.collectionVariables.set(\"runId\", id);",
+                  "pm.collectionVariables.set(\"runFirstName\", `Qa${id}`);",
+                  "pm.collectionVariables.set(\"runFirstNameLower\", `qa${id}`);",
+                  "pm.collectionVariables.set(\"runLastName\", `Run${id}`);",
+                  "pm.collectionVariables.set(\"updatedFirstName\", `Updated${id}`);",
+                  "pm.collectionVariables.set(\"patchedFirstName\", `Patched${id}`);",
+                  "pm.collectionVariables.set(\"createdBookingIds\", \"[]\");",
+                  "pm.collectionVariables.unset(\"token\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ping",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[PING-001] Проверка доступности сервиса",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Content-Type is text\", function () { pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"text/plain\"); });",
+                  "pm.test(\"Body is Created\", function () { pm.expect(pm.response.text()).to.eql(\"Created\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ping",
+            "description": "Test case: PING-001\nType: Позитивный\nExpected: HTTP 201; HTTP 201; Content-Type text/plain; тело Created.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[PING-002] Неподдерживаемый метод для health-check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/ping",
+            "description": "Test case: PING-002\nType: Негативный\nExpected: HTTP 404; HTTP 404; ресурс для метода POST отсутствует.\nLinked defect: none"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Authentication",
+      "item": [
+        {
+          "name": "[AUTH-001] Получение токена с валидными учётными данными",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Content-Type is JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/json\"); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Token is a non-empty string\", function () { pm.expect(json.token).to.be.a(\"string\").and.not.empty; });",
+                  "if (json.token) pm.collectionVariables.set(\"token\", json.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/auth",
+            "description": "Test case: AUTH-001\nType: Позитивный\nExpected: HTTP 200; HTTP 200; JSON содержит непустой строковый token и не содержит reason.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[AUTH-002] Неверный пароль",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Token is not issued\", function () { pm.expect(pm.response.text()).not.to.include(\"token\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"wrong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/auth",
+            "description": "Test case: AUTH-002\nType: Негативный\nExpected: HTTP 401; HTTP 401 Unauthorized; token отсутствует; возвращено безопасное сообщение об ошибке.\nLinked defect: BUG-001"
+          },
+          "response": []
+        },
+        {
+          "name": "[AUTH-003] Отсутствует обязательный password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Token is not issued\", function () { pm.expect(pm.response.text()).not.to.include(\"token\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/auth",
+            "description": "Test case: AUTH-003\nType: Негативный\nExpected: HTTP 400; HTTP 400 Bad Request; token отсутствует; указан некорректный/пропущенный параметр.\nLinked defect: BUG-001"
+          },
+          "response": []
+        },
+        {
+          "name": "[AUTH-004] Невалидный JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/auth",
+            "description": "Test case: AUTH-004\nType: Негативный\nExpected: HTTP 400; HTTP 400 Bad Request; token не создан.\nLinked defect: none"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Get Booking IDs and Get Booking",
+      "item": [
+        {
+          "name": "[SETUP] Create filter fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Fixture has bookingid\", function () { pm.expect(json.bookingid).to.be.a(\"number\"); });",
+                  "if (json.bookingid) pm.collectionVariables.set(\"filterBookingId\", String(json.bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{runFirstName}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-001] Получение списка идентификаторов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Content-Type is JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/json\"); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Response is an array of numeric IDs\", function () { pm.expect(json).to.be.an(\"array\"); json.forEach(x => pm.expect(x.bookingid).to.be.a(\"number\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-LIST-001\nType: Позитивный\nExpected: HTTP 200; HTTP 200; JSON-массив; каждый элемент содержит числовой bookingid.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-002] Фильтрация по firstname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Created ID is returned\", function () { pm.expect(ids).to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?firstname={{runFirstName}}",
+            "description": "Test case: BOOK-LIST-002\nType: Позитивный\nExpected: HTTP 200; HTTP 200; массив содержит созданную бронь.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-003] Фильтрация по lastname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Created ID is returned\", function () { pm.expect(ids).to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?lastname={{runLastName}}",
+            "description": "Test case: BOOK-LIST-003\nType: Позитивный\nExpected: HTTP 200; HTTP 200; массив содержит созданную бронь.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-004] Совместная фильтрация по имени и фамилии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Combined filter returns fixture\", function () { pm.expect(ids).to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?firstname={{runFirstName}}&lastname={{runLastName}}",
+            "description": "Test case: BOOK-LIST-004\nType: Позитивный\nExpected: HTTP 200; HTTP 200; результат содержит filterBookingId и не содержит записей с другой парой имён.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-005] Фильтр без совпадений",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.test(\"Result is empty\", function () { pm.expect(pm.response.json()).to.eql([]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?firstname=DefinitelyNoSuchGuest",
+            "description": "Test case: BOOK-LIST-005\nType: Негативный\nExpected: HTTP 200; HTTP 200; пустой JSON-массив [].\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-006] Регистрозависимое несовпадение firstname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Case-mismatched value does not return fixture\", function () { pm.expect(ids).not.to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?firstname={{runFirstNameLower}}",
+            "description": "Test case: BOOK-LIST-006\nType: Негативный\nExpected: HTTP 200; HTTP 200; filterBookingId отсутствует (точное регистрозависимое сравнение).\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-007] Граница фильтра checkin включительна",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Equal checkin boundary is included\", function () { pm.expect(ids).to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?checkin=2030-06-15",
+            "description": "Test case: BOOK-LIST-007\nType: Позитивный\nExpected: HTTP 200; HTTP 200; фикстура включена, так как документация задаёт >=.\nLinked defect: BUG-006"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-008] Граница фильтра checkout включительна",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Equal checkout boundary is included\", function () { pm.expect(ids).to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?checkout=2030-06-20",
+            "description": "Test case: BOOK-LIST-008\nType: Позитивный\nExpected: HTTP 200; HTTP 200; фикстура включена согласно документированному условию >=.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-009] Направление сравнения фильтра checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const ids = pm.response.json().map(x => String(x.bookingid)); pm.test(\"Documented checkout >= rule is applied\", function () { pm.expect(ids).to.include(pm.collectionVariables.get(\"filterBookingId\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?checkout=2030-06-19",
+            "description": "Test case: BOOK-LIST-009\nType: Позитивный\nExpected: HTTP 200; HTTP 200; фикстура включена, поскольку 2030-06-20 >= 2030-06-19.\nLinked defect: BUG-006"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-LIST-010] Невалидный формат даты в query",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking?checkin=not-a-date",
+            "description": "Test case: BOOK-LIST-010\nType: Негативный\nExpected: HTTP 400; HTTP 400; понятное сообщение валидации; сервис остаётся доступен.\nLinked defect: BUG-006"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-GET-001] Получение существующей брони в JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Content-Type is JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/json\"); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"Booking matches fixture\", function () { pm.expect(json.firstname).to.eql(pm.collectionVariables.get(\"runFirstName\")); pm.expect(json.lastname).to.eql(pm.collectionVariables.get(\"runLastName\")); pm.expect(json.totalprice).to.eql(321); pm.expect(json.depositpaid).to.eql(true); pm.expect(json.bookingdates).to.eql({checkin:\"2030-06-15\", checkout:\"2030-06-20\"}); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{filterBookingId}}",
+            "description": "Test case: BOOK-GET-001\nType: Позитивный\nExpected: HTTP 200; HTTP 200; JSON содержит все поля брони с корректными типами и значениями.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-GET-002] Получение существующей брони в XML",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Content-Type is XML\", function () { pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/xml\"); });",
+                  "pm.test(\"Body contains booking XML\", function () { pm.expect(pm.response.text()).to.include(\"<booking>\").and.to.include(pm.collectionVariables.get(\"runFirstName\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/xml",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{filterBookingId}}",
+            "description": "Test case: BOOK-GET-002\nType: Позитивный\nExpected: HTTP 200; HTTP 200; валидный XML; Content-Type содержит application/xml.\nLinked defect: BUG-007"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-GET-003] Несуществующий bookingid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking/999999999",
+            "description": "Test case: BOOK-GET-003\nType: Негативный\nExpected: HTTP 404; HTTP 404 Not Found.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-GET-004] Нечисловой идентификатор",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking/not-a-number",
+            "description": "Test case: BOOK-GET-004\nType: Негативный\nExpected: HTTP 404; HTTP 404; чужая бронь не возвращается.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-GET-005] Числовой префикс с мусором в ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Booking data is not exposed\", function () { pm.expect(pm.response.text()).not.to.include(pm.collectionVariables.get(\"runFirstName\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking/{{filterBookingId}}abc",
+            "description": "Test case: BOOK-GET-005\nType: Негативный\nExpected: HTTP 400; HTTP 400 (допустимо 404); данные существующей брони не возвращаются.\nLinked defect: BUG-008"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-GET-006] Неподдерживаемый Accept",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 406\", function () { pm.response.to.have.status(406); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/pdf",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{filterBookingId}}",
+            "description": "Test case: BOOK-GET-006\nType: Негативный\nExpected: HTTP 406; HTTP 406 Not Acceptable.\nLinked defect: BUG-007"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Create Booking",
+      "item": [
+        {
+          "name": "[BOOK-POST-001] Создание брони в JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Content-Type is JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/json\"); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"ID and booking are returned\", function () { pm.expect(json.bookingid).to.be.a(\"number\"); pm.expect(json.booking.firstname).to.eql(`Json${pm.collectionVariables.get(\"runId\")}`); pm.expect(json.booking.lastname).to.eql(pm.collectionVariables.get(\"runLastName\")); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Json{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-001\nType: Позитивный\nExpected: HTTP 200; HTTP 200; числовой bookingid; booking полностью совпадает с запросом.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-002] Создание брони в XML с depositpaid=false",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"XML false remains boolean false\", function () { pm.expect(json.booking.depositpaid).to.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<booking><firstname>Xml{{runId}}</firstname><lastname>{{runLastName}}</lastname><totalprice>100</totalprice><depositpaid>false</depositpaid><bookingdates><checkin>2031-01-01</checkin><checkout>2031-01-02</checkout></bookingdates><additionalneeds>None</additionalneeds></booking>",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-002\nType: Позитивный\nExpected: HTTP 200; HTTP 200; depositpaid остаётся false; остальные значения сохранены без искажения.\nLinked defect: BUG-005"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-003] Граничные значения totalprice=0 и depositpaid=false",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"Boundary values are preserved\", function () { pm.expect(json.booking.totalprice).to.eql(0); pm.expect(json.booking.depositpaid).to.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Boundary{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 0,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-003\nType: Позитивный\nExpected: HTTP 200; HTTP 200; totalprice строго 0; depositpaid строго false.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-004] Отсутствует обязательный firstname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-004\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана; указано отсутствующее поле.\nLinked defect: BUG-002"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-005] Отсутствует bookingdates.checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"NoCheckout{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-005\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана.\nLinked defect: BUG-002"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-006] Отсутствует обязательный additionalneeds",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"No booking ID is returned\", function () { pm.expect(pm.response.text()).not.to.include(\"bookingid\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"NoNeeds{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-006\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана.\nLinked defect: BUG-003"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-007] Пустой firstname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-007\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана.\nLinked defect: BUG-003"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-008] Неверные типы totalprice и depositpaid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"WrongTypes{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": \"three hundred\",\n  \"depositpaid\": \"yes\",\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-008\nType: Негативный\nExpected: HTTP 400; HTTP 400; запись не создана; поля с ошибкой перечислены.\nLinked defect: BUG-004"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-009] Невалидная дата checkin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"InvalidDate{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"not-a-date\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-009\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана.\nLinked defect: BUG-004"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-010] checkout раньше checkin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"ReverseDates{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-20\",\n    \"checkout\": \"2030-06-15\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-010\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана; checkout должен быть позже checkin.\nLinked defect: BUG-004"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-011] Невалидный JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstname\":\"Broken\",",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-011\nType: Негативный\nExpected: HTTP 400; HTTP 400; бронь не создана.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-012] Неподдерживаемый Accept",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 406\", function () { pm.response.to.have.status(406); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/pdf",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"BadAccept{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-012\nType: Негативный\nExpected: HTTP 406; HTTP 406 Not Acceptable; ответ не маскируется нестандартным кодом.\nLinked defect: BUG-007"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-POST-013] Неподдерживаемый Content-Type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 415\", function () { pm.response.to.have.status(415); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"TextPlain{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Test case: BOOK-POST-013\nType: Негативный\nExpected: HTTP 415; HTTP 415 Unsupported Media Type; бронь не создана.\nLinked defect: BUG-002"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Update Booking (PUT)",
+      "item": [
+        {
+          "name": "[SETUP] Create PUT fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"putBookingId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Put{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[SETUP] Create PUT validation fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"putValidationBookingId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"PutValidation{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-001] Полная замена брони по token cookie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"Full payload is returned\", function () { pm.expect(json.firstname).to.eql(pm.collectionVariables.get(\"updatedFirstName\")); pm.expect(json.totalprice).to.eql(777); pm.expect(json.depositpaid).to.eql(false); pm.expect(json.bookingdates.checkout).to.eql(\"2031-01-20\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{updatedFirstName}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 777,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{putBookingId}}",
+            "description": "Test case: BOOK-PUT-001\nType: Позитивный\nExpected: HTTP 200; HTTP 200; все поля равны новому payload.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-002] Проверка сохранения результата PUT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"PUT is persisted\", function () { pm.expect(json.firstname).to.eql(pm.collectionVariables.get(\"updatedFirstName\")); pm.expect(json.totalprice).to.eql(777); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking/{{putBookingId}}",
+            "description": "Test case: BOOK-PUT-002\nType: Позитивный\nExpected: HTTP 200; HTTP 200; изменения сохранены.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-003] Полная замена по Basic Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.test(\"Basic Auth update is applied\", function () { pm.expect(pm.response.json().firstname).to.eql(`BasicPut${pm.collectionVariables.get(\"runId\")}`); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46cGFzc3dvcmQxMjM=",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"BasicPut{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 777,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{putBookingId}}",
+            "description": "Test case: BOOK-PUT-003\nType: Позитивный\nExpected: HTTP 200; HTTP 200; запись обновлена без cookie token.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-004] PUT без авторизации",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{updatedFirstName}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 777,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{putBookingId}}",
+            "description": "Test case: BOOK-PUT-004\nType: Негативный\nExpected: HTTP 403; HTTP 403 Forbidden; данные не изменены.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-005] PUT с невалидным token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{updatedFirstName}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 777,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{putBookingId}}",
+            "description": "Test case: BOOK-PUT-005\nType: Негативный\nExpected: HTTP 403; HTTP 403 Forbidden; данные не изменены.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-006] PUT без обязательного lastname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{updatedFirstName}}\",\n  \"totalprice\": 777,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{putBookingId}}",
+            "description": "Test case: BOOK-PUT-006\nType: Негативный\nExpected: HTTP 400; HTTP 400; исходная запись не изменена.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-007] PUT с неверными типами",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{updatedFirstName}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": \"invalid\",\n  \"depositpaid\": 1,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{putValidationBookingId}}",
+            "description": "Test case: BOOK-PUT-007\nType: Негативный\nExpected: HTTP 400; HTTP 400; данные не изменены.\nLinked defect: BUG-004"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PUT-008] PUT несуществующей брони",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{updatedFirstName}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 777,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2031-01-10\",\n    \"checkout\": \"2031-01-20\"\n  },\n  \"additionalneeds\": \"Late checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/999999999",
+            "description": "Test case: BOOK-PUT-008\nType: Негативный\nExpected: HTTP 404; HTTP 404 Not Found.\nLinked defect: BUG-009"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Partial Update Booking (PATCH)",
+      "item": [
+        {
+          "name": "[SETUP] Create PATCH fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"patchBookingId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Patch{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[SETUP] Create PATCH validation fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"patchValidationBookingId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"PatchValidation{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-001] Частичное изменение firstname по token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"Only requested field changes\", function () { pm.expect(json.firstname).to.eql(pm.collectionVariables.get(\"patchedFirstName\")); pm.expect(json.lastname).to.eql(pm.collectionVariables.get(\"runLastName\")); pm.expect(json.totalprice).to.eql(321); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"{{patchedFirstName}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{patchBookingId}}",
+            "description": "Test case: BOOK-PATCH-001\nType: Позитивный\nExpected: HTTP 200; HTTP 200; firstname изменён; остальные поля не изменены.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-002] Проверка сохранения PATCH",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const json = pm.response.json(); pm.test(\"PATCH is persisted\", function () { pm.expect(json.firstname).to.eql(pm.collectionVariables.get(\"patchedFirstName\")); pm.expect(json.additionalneeds).to.eql(\"Breakfast\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking/{{patchBookingId}}",
+            "description": "Test case: BOOK-PATCH-002\nType: Позитивный\nExpected: HTTP 200; HTTP 200; изменение сохранено, непереданные поля сохранены.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-003] Частичное обновление по Basic Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.test(\"Basic Auth patch is applied\", function () { pm.expect(pm.response.json().lastname).to.eql(\"BasicUpdated\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46cGFzc3dvcmQxMjM=",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastname\": \"BasicUpdated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{patchBookingId}}",
+            "description": "Test case: BOOK-PATCH-003\nType: Позитивный\nExpected: HTTP 200; HTTP 200; только lastname изменён.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-004] PATCH без авторизации",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastname\": \"NoAuth\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{patchBookingId}}",
+            "description": "Test case: BOOK-PATCH-004\nType: Негативный\nExpected: HTTP 403; HTTP 403 Forbidden; запись не изменена.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-005] PATCH с невалидным token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastname\": \"BadToken\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{patchBookingId}}",
+            "description": "Test case: BOOK-PATCH-005\nType: Негативный\nExpected: HTTP 403; HTTP 403 Forbidden; запись не изменена.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-006] PATCH с неверным типом totalprice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalprice\": \"free\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/{{patchValidationBookingId}}",
+            "description": "Test case: BOOK-PATCH-006\nType: Негативный\nExpected: HTTP 400; HTTP 400; исходное значение не изменено.\nLinked defect: BUG-004"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-PATCH-007] PATCH несуществующей брони",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Missing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking/999999999",
+            "description": "Test case: BOOK-PATCH-007\nType: Негативный\nExpected: HTTP 404; HTTP 404 Not Found.\nLinked defect: BUG-009"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Delete Booking",
+      "item": [
+        {
+          "name": "[SETUP] Create DELETE cookie fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"deleteCookieId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"DeleteCookie{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[SETUP] Create DELETE basic fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"deleteBasicId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"DeleteBasic{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[SETUP] Create DELETE auth fixture",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"deleteAuthId\", String(pm.response.json().bookingid));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"DeleteAuth{{runId}}\",\n  \"lastname\": \"{{runLastName}}\",\n  \"totalprice\": 321,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2030-06-15\",\n    \"checkout\": \"2030-06-20\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/booking",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-001] Удаление брони по token cookie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteCookieId}}",
+            "description": "Test case: BOOK-DELETE-001\nType: Позитивный\nExpected: HTTP 201; HTTP 201 согласно контракту сервиса.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-002] Проверка удаления через GET",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/booking/{{deleteCookieId}}",
+            "description": "Test case: BOOK-DELETE-002\nType: Позитивный\nExpected: HTTP 404; HTTP 404 Not Found.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-003] Удаление по Basic Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46cGFzc3dvcmQxMjM=",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteBasicId}}",
+            "description": "Test case: BOOK-DELETE-003\nType: Позитивный\nExpected: HTTP 201; HTTP 201; запись удалена.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-004] DELETE без авторизации",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteAuthId}}",
+            "description": "Test case: BOOK-DELETE-004\nType: Негативный\nExpected: HTTP 403; HTTP 403; запись остаётся доступной.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-005] DELETE с невалидным token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteAuthId}}",
+            "description": "Test case: BOOK-DELETE-005\nType: Негативный\nExpected: HTTP 403; HTTP 403; запись не удалена.\nLinked defect: none"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-006] DELETE несуществующей брони",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/999999999",
+            "description": "Test case: BOOK-DELETE-006\nType: Негативный\nExpected: HTTP 404; HTTP 404 Not Found.\nLinked defect: BUG-009"
+          },
+          "response": []
+        },
+        {
+          "name": "[BOOK-DELETE-007] Повторное удаление той же брони",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteCookieId}}",
+            "description": "Test case: BOOK-DELETE-007\nType: Негативный\nExpected: HTTP 404; HTTP 404 Not Found.\nLinked defect: BUG-009"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "99 - Cleanup",
+      "item": [
+        {
+          "name": "[SETUP] Delete fixtures created by this run",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "const ids = [...new Set(JSON.parse(pm.collectionVariables.get(\"createdBookingIds\") || \"[]\"))];",
+                  "pm.test(\"Cleanup uses only explicitly tracked IDs\", function () { pm.expect(ids).to.be.an(\"array\"); });",
+                  "const basic = require(\"btoa\")(`${pm.environment.get(\"username\")}:${pm.environment.get(\"password\")}`);",
+                  "ids.forEach(id => pm.sendRequest({url: `${pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\")}/booking/${id}`, method: \"DELETE\", header: {\"Authorization\": `Basic ${basic}`}}, function (err, res) { pm.test(`[CLEANUP] Delete tracked ID ${id}`, function () { pm.expect(err).to.eql(null); pm.expect([201, 404, 405]).to.include(res.code); }); }));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ping",
+            "description": "Служебный запрос для независимой подготовки тестовых данных."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

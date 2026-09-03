@@ -1,0 +1,926 @@
+{
+  "generated_at_utc": "2026-09-03T00:01:00Z",
+  "source_collection": "postman/Restful-Booker.postman_collection.json",
+  "execution": "Eight self-contained Newman groups derived from the same collection; unique test IDs deduplicated.",
+  "test_cases": {
+    "total": 57,
+    "passed": 33,
+    "failed": 24
+  },
+  "assertion_failures": 26,
+  "sequential_equivalent_duration_ms": 727527,
+  "failing_cases": [
+    {
+      "id": "AUTH-002",
+      "name": "Неверный пароль",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 401"
+      ],
+      "bug_id": "BUG-001"
+    },
+    {
+      "id": "AUTH-003",
+      "name": "Отсутствует обязательный password",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-001"
+    },
+    {
+      "id": "BOOK-DELETE-006",
+      "name": "DELETE несуществующей брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "BOOK-DELETE-007",
+      "name": "Повторное удаление той же брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "BOOK-GET-002",
+      "name": "Получение существующей брони в XML",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "Content-Type is XML"
+      ],
+      "bug_id": "BUG-007"
+    },
+    {
+      "id": "BOOK-GET-005",
+      "name": "Числовой префикс с мусором в ID",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400",
+        "Booking data is not exposed"
+      ],
+      "bug_id": "BUG-008"
+    },
+    {
+      "id": "BOOK-GET-006",
+      "name": "Неподдерживаемый Accept",
+      "result": "failed",
+      "actual_statuses": [
+        418
+      ],
+      "failed_assertions": [
+        "HTTP 406"
+      ],
+      "bug_id": "BUG-007"
+    },
+    {
+      "id": "BOOK-LIST-007",
+      "name": "Граница фильтра checkin включительна",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "Equal checkin boundary is included"
+      ],
+      "bug_id": "BUG-006"
+    },
+    {
+      "id": "BOOK-LIST-009",
+      "name": "Направление сравнения фильтра checkout",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "Documented checkout >= rule is applied"
+      ],
+      "bug_id": "BUG-006"
+    },
+    {
+      "id": "BOOK-LIST-010",
+      "name": "Невалидный формат даты в query",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-006"
+    },
+    {
+      "id": "BOOK-PATCH-006",
+      "name": "PATCH с неверным типом totalprice",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-PATCH-007",
+      "name": "PATCH несуществующей брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "BOOK-POST-002",
+      "name": "Создание брони в XML с depositpaid=false",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "XML false remains boolean false"
+      ],
+      "bug_id": "BUG-005"
+    },
+    {
+      "id": "BOOK-POST-004",
+      "name": "Отсутствует обязательный firstname",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-002"
+    },
+    {
+      "id": "BOOK-POST-005",
+      "name": "Отсутствует bookingdates.checkout",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-002"
+    },
+    {
+      "id": "BOOK-POST-006",
+      "name": "Отсутствует обязательный additionalneeds",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400",
+        "No booking ID is returned"
+      ],
+      "bug_id": "BUG-003"
+    },
+    {
+      "id": "BOOK-POST-007",
+      "name": "Пустой firstname",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-003"
+    },
+    {
+      "id": "BOOK-POST-008",
+      "name": "Неверные типы totalprice и depositpaid",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-POST-009",
+      "name": "Невалидная дата checkin",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-POST-010",
+      "name": "checkout раньше checkin",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-POST-012",
+      "name": "Неподдерживаемый Accept",
+      "result": "failed",
+      "actual_statuses": [
+        418
+      ],
+      "failed_assertions": [
+        "HTTP 406"
+      ],
+      "bug_id": "BUG-007"
+    },
+    {
+      "id": "BOOK-POST-013",
+      "name": "Неподдерживаемый Content-Type",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 415"
+      ],
+      "bug_id": "BUG-002"
+    },
+    {
+      "id": "BOOK-PUT-007",
+      "name": "PUT с неверными типами",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-PUT-008",
+      "name": "PUT несуществующей брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    }
+  ],
+  "all_cases": [
+    {
+      "id": "AUTH-001",
+      "name": "Получение токена с валидными учётными данными",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "AUTH-002",
+      "name": "Неверный пароль",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 401"
+      ],
+      "bug_id": "BUG-001"
+    },
+    {
+      "id": "AUTH-003",
+      "name": "Отсутствует обязательный password",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-001"
+    },
+    {
+      "id": "AUTH-004",
+      "name": "Невалидный JSON",
+      "result": "passed",
+      "actual_statuses": [
+        400
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-DELETE-001",
+      "name": "Удаление брони по token cookie",
+      "result": "passed",
+      "actual_statuses": [
+        201
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-DELETE-002",
+      "name": "Проверка удаления через GET",
+      "result": "passed",
+      "actual_statuses": [
+        404
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-DELETE-003",
+      "name": "Удаление по Basic Auth",
+      "result": "passed",
+      "actual_statuses": [
+        201
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-DELETE-004",
+      "name": "DELETE без авторизации",
+      "result": "passed",
+      "actual_statuses": [
+        403
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-DELETE-005",
+      "name": "DELETE с невалидным token",
+      "result": "passed",
+      "actual_statuses": [
+        403
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-DELETE-006",
+      "name": "DELETE несуществующей брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "BOOK-DELETE-007",
+      "name": "Повторное удаление той же брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "BOOK-GET-001",
+      "name": "Получение существующей брони в JSON",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-GET-002",
+      "name": "Получение существующей брони в XML",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "Content-Type is XML"
+      ],
+      "bug_id": "BUG-007"
+    },
+    {
+      "id": "BOOK-GET-003",
+      "name": "Несуществующий bookingid",
+      "result": "passed",
+      "actual_statuses": [
+        404
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-GET-004",
+      "name": "Нечисловой идентификатор",
+      "result": "passed",
+      "actual_statuses": [
+        404
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-GET-005",
+      "name": "Числовой префикс с мусором в ID",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400",
+        "Booking data is not exposed"
+      ],
+      "bug_id": "BUG-008"
+    },
+    {
+      "id": "BOOK-GET-006",
+      "name": "Неподдерживаемый Accept",
+      "result": "failed",
+      "actual_statuses": [
+        418
+      ],
+      "failed_assertions": [
+        "HTTP 406"
+      ],
+      "bug_id": "BUG-007"
+    },
+    {
+      "id": "BOOK-LIST-001",
+      "name": "Получение списка идентификаторов",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-002",
+      "name": "Фильтрация по firstname",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-003",
+      "name": "Фильтрация по lastname",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-004",
+      "name": "Совместная фильтрация по имени и фамилии",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-005",
+      "name": "Фильтр без совпадений",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-006",
+      "name": "Регистрозависимое несовпадение firstname",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-007",
+      "name": "Граница фильтра checkin включительна",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "Equal checkin boundary is included"
+      ],
+      "bug_id": "BUG-006"
+    },
+    {
+      "id": "BOOK-LIST-008",
+      "name": "Граница фильтра checkout включительна",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-LIST-009",
+      "name": "Направление сравнения фильтра checkout",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "Documented checkout >= rule is applied"
+      ],
+      "bug_id": "BUG-006"
+    },
+    {
+      "id": "BOOK-LIST-010",
+      "name": "Невалидный формат даты в query",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-006"
+    },
+    {
+      "id": "BOOK-PATCH-001",
+      "name": "Частичное изменение firstname по token",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PATCH-002",
+      "name": "Проверка сохранения PATCH",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PATCH-003",
+      "name": "Частичное обновление по Basic Auth",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PATCH-004",
+      "name": "PATCH без авторизации",
+      "result": "passed",
+      "actual_statuses": [
+        403
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PATCH-005",
+      "name": "PATCH с невалидным token",
+      "result": "passed",
+      "actual_statuses": [
+        403
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PATCH-006",
+      "name": "PATCH с неверным типом totalprice",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-PATCH-007",
+      "name": "PATCH несуществующей брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "BOOK-POST-001",
+      "name": "Создание брони в JSON",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-POST-002",
+      "name": "Создание брони в XML с depositpaid=false",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "XML false remains boolean false"
+      ],
+      "bug_id": "BUG-005"
+    },
+    {
+      "id": "BOOK-POST-003",
+      "name": "Граничные значения totalprice=0 и depositpaid=false",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-POST-004",
+      "name": "Отсутствует обязательный firstname",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-002"
+    },
+    {
+      "id": "BOOK-POST-005",
+      "name": "Отсутствует bookingdates.checkout",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-002"
+    },
+    {
+      "id": "BOOK-POST-006",
+      "name": "Отсутствует обязательный additionalneeds",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400",
+        "No booking ID is returned"
+      ],
+      "bug_id": "BUG-003"
+    },
+    {
+      "id": "BOOK-POST-007",
+      "name": "Пустой firstname",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-003"
+    },
+    {
+      "id": "BOOK-POST-008",
+      "name": "Неверные типы totalprice и depositpaid",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-POST-009",
+      "name": "Невалидная дата checkin",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-POST-010",
+      "name": "checkout раньше checkin",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-POST-011",
+      "name": "Невалидный JSON",
+      "result": "passed",
+      "actual_statuses": [
+        400
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-POST-012",
+      "name": "Неподдерживаемый Accept",
+      "result": "failed",
+      "actual_statuses": [
+        418
+      ],
+      "failed_assertions": [
+        "HTTP 406"
+      ],
+      "bug_id": "BUG-007"
+    },
+    {
+      "id": "BOOK-POST-013",
+      "name": "Неподдерживаемый Content-Type",
+      "result": "failed",
+      "actual_statuses": [
+        500
+      ],
+      "failed_assertions": [
+        "HTTP 415"
+      ],
+      "bug_id": "BUG-002"
+    },
+    {
+      "id": "BOOK-PUT-001",
+      "name": "Полная замена брони по token cookie",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PUT-002",
+      "name": "Проверка сохранения результата PUT",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PUT-003",
+      "name": "Полная замена по Basic Auth",
+      "result": "passed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PUT-004",
+      "name": "PUT без авторизации",
+      "result": "passed",
+      "actual_statuses": [
+        403
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PUT-005",
+      "name": "PUT с невалидным token",
+      "result": "passed",
+      "actual_statuses": [
+        403
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PUT-006",
+      "name": "PUT без обязательного lastname",
+      "result": "passed",
+      "actual_statuses": [
+        400
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "BOOK-PUT-007",
+      "name": "PUT с неверными типами",
+      "result": "failed",
+      "actual_statuses": [
+        200
+      ],
+      "failed_assertions": [
+        "HTTP 400"
+      ],
+      "bug_id": "BUG-004"
+    },
+    {
+      "id": "BOOK-PUT-008",
+      "name": "PUT несуществующей брони",
+      "result": "failed",
+      "actual_statuses": [
+        405
+      ],
+      "failed_assertions": [
+        "HTTP 404"
+      ],
+      "bug_id": "BUG-009"
+    },
+    {
+      "id": "PING-001",
+      "name": "Проверка доступности сервиса",
+      "result": "passed",
+      "actual_statuses": [
+        201
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    },
+    {
+      "id": "PING-002",
+      "name": "Неподдерживаемый метод для health-check",
+      "result": "passed",
+      "actual_statuses": [
+        404
+      ],
+      "failed_assertions": [],
+      "bug_id": null
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-09-03T00:03:54.356Z",
+  "test_case_count": 57,
+  "collection_case_count": 57,
+  "bug_count": 9,
+  "passed_in_exploration": 33,
+  "failed_in_exploration": 24,
+  "not_run_in_exploration": 0,
+  "sha256": {
+    "postman/Restful-Booker.postman_collection.json": "568f4f543d43444544898e32e3252f16e54aa101bf5569063c41405d704cd5b0",
+    "postman/Restful-Booker.postman_environment.json": "b443c86deb9fbf5dec61bfa7e60a6ee9a2e4b78f0d5e09c01f525240fdb09dc1",
+    "test-cases/Test-cases.xlsx": "ded20d6c71dd47cd1e9f22b93782d074fe7543449b96c3b5e6683bdc6579802a",
+    "bug-reports/Bug-reports.xlsx": "084efb4251af58e7248efe8b3b0b47d3f601a793f70dbce511fc99c9b2833692"
+  }
+}
